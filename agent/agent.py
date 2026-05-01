@@ -5,7 +5,7 @@
 import logging
 import numpy as np
 
-import features as feat_builder
+from agent import features as feat_builder
 import graph as pipeline
 from graph import FraudState
 

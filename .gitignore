@@ -60,8 +60,12 @@ dist/
 *.h5
 *.model
 
-# If you WANT to keep your trained model:
-!xgb_model.pkl
+# ✅ IMPORTANT: allow models folder
+!models/
+!models/*.pkl
+!models/*.joblib
+!models/*.h5
+!models/*.model
 
 # ==============================
 # Data Files (optional)

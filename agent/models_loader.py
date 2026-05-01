@@ -11,11 +11,12 @@ logger = logging.getLogger(__name__)
 BASE = os.path.dirname(os.path.abspath(__file__))
 
 
+
 def _load(name: str):
-    path = os.path.join(BASE, 'models', name)
+    path = os.path.join(BASE, '..', 'models', name)
+    path = os.path.abspath(path)
     logger.debug(f"Loading model: {path}")
     return joblib.load(path)
-
 
 def load_all() -> dict:
     """

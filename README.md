@@ -31,33 +31,6 @@ Risk Scorer → Pattern Analyzer → Rule Engine → SHAP Explainer → Groq LLM
 
 **Final decision:** `APPROVE` / `FLAG` / `BLOCK` — with confidence %, risk level, and threshold comparison.
 
----
-
-## 🏗️ Project Structure
-
-```
-fraud_dashboard/
-├── app.py                          # Entry point — page config + orchestration only
-│
-├── styles/
-│   ├── __init__.py
-│   └── custom_css.py               # All CSS + decision color/emoji/class maps
-│
-├── components/
-│   ├── __init__.py
-│   ├── sidebar.py                  # Input controls + model info panel
-│   ├── charts.py                   # All four Plotly figure builders
-│   ├── result_display.py           # Post-analysis render (banner + rows 1–3)
-│   └── history.py                  # Session state helpers + history panel
-│
-├── agent/
-│   └── agent.py                    # LangGraph 6-node pipeline
-│
-└── models/
-    └── model_summary.json          # Saved model metrics (AUC, F1, feature count)
-```
-
----
 
 ## 📊 Model Details
 

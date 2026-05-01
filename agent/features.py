@@ -7,7 +7,7 @@ import pandas as pd
 import logging
 
 from agent.config import HIGH_RISK_EMAILS, MEDIUM_RISK_EMAILS
-from agent.models_loader import load_models
+from agent import models_loader
 logger = logging.getLogger(__name__)
 
 

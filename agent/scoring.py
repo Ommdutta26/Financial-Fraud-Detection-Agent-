@@ -5,7 +5,7 @@
 import numpy as np
 import logging
 
-import models_loader
+from agent import models_loader
 from agent.config import RISK_BANDS
 
 logger = logging.getLogger(__name__)

@@ -2,7 +2,7 @@
 # rules.py — Business rule engine & behavioral pattern flags
 # ============================================================
 
-from config import (
+from agent.config import (
     HIGH_RISK_EMAILS,
     RULE_AMOUNT_WARN, RULE_AMOUNT_AML, RULE_NIGHT_AMOUNT,
     RULE_EMAIL_AMOUNT, RULE_MODEL_THRESH,

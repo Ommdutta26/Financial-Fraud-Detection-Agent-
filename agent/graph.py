@@ -6,7 +6,7 @@ from typing import TypedDict, List
 import numpy as np
 from langgraph.graph import StateGraph, END
 
-import nodes
+from agent import nodes
 
 
 # ── State schema ─────────────────────────────────────────────

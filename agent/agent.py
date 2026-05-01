@@ -6,8 +6,8 @@ import logging
 import numpy as np
 
 from agent import features as feat_builder
-import graph as pipeline
-from graph import FraudState
+from agent import graph as pipeline
+from agent.graph import FraudState
 
 logging.basicConfig(
     level  = logging.INFO,

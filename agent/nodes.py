@@ -5,13 +5,12 @@
 
 import logging
 
-import models_loader
-import scoring
-import rules
-import llm_client
+from agent import models_loader
+from agent import scoring
+from agent import rules
+from agent import llm_client
 from agent import report as report_builder
 from agent.config import FAST_APPROVE_THRESHOLD
-
 logger = logging.getLogger(__name__)
 
 

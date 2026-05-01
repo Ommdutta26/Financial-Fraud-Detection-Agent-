@@ -9,8 +9,8 @@ import models_loader
 import scoring
 import rules
 import llm_client
-import report as report_builder
-from config import FAST_APPROVE_THRESHOLD
+from agent import report as report_builder
+from agent.config import FAST_APPROVE_THRESHOLD
 
 logger = logging.getLogger(__name__)
 

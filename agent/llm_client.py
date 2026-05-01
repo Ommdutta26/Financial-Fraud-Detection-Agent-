@@ -7,7 +7,7 @@ import logging
 from dotenv import load_dotenv
 from groq import Groq
 
-from config import GROQ_MODEL, LLM_MAX_TOKENS, LLM_TEMPERATURE
+from agent.config import GROQ_MODEL, LLM_MAX_TOKENS, LLM_TEMPERATURE
 
 load_dotenv()
 logger = logging.getLogger(__name__)

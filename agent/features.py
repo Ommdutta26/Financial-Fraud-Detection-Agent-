@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import logging
 
-from config import HIGH_RISK_EMAILS, MEDIUM_RISK_EMAILS
+from agent.config import HIGH_RISK_EMAILS, MEDIUM_RISK_EMAILS
 import models_loader
 
 logger = logging.getLogger(__name__)

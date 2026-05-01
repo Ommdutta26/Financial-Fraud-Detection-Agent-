@@ -1,3 +1,11 @@
+# ============================================================
+# models_loader.py — Load all pickled models once at startup
+# ============================================================
+
+import os
+import joblib
+import logging
+
 BASE = os.path.dirname(os.path.abspath(__file__))
 
 def _load(name: str):

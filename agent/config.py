@@ -3,12 +3,14 @@
 # ============================================================
 
 # ── Groq / LLM ──────────────────────────────────────────────
-GROQ_MODEL = "llama-3.3-70b-versatile"
-LLM_MAX_TOKENS = 250
-LLM_TEMPERATURE = 0.1
+GROQ_MODEL       = "llama-3.3-70b-versatile"
+LLM_MAX_TOKENS   = 250
+LLM_TEMPERATURE  = 0.1
 
-# ── Fast-approve shortcut ────────────────────────────────────
-FAST_APPROVE_THRESHOLD = 0.08   # scores below this skip full pipeline
+# ── Decision thresholds ──────────────────────────────────────
+FAST_APPROVE_THRESHOLD  = 0.03   # skip pipeline only if very confident
+DECISION_BLOCK_THRESHOLD = 0.70
+DECISION_FLAG_THRESHOLD  = 0.30
 
 # ── Risk level bands ─────────────────────────────────────────
 RISK_BANDS = {
@@ -18,19 +20,31 @@ RISK_BANDS = {
     "CRITICAL": (0.75, 1.00),
 }
 
-# ── Email domain risk lists ──────────────────────────────────
-HIGH_RISK_EMAILS = {
-    'anonymous.com', 'guerrillamail.com', 'tempmail.com',
-    'throwam.com', 'mailnull.com',
+# ── Email domain risk scores ─────────────────────────────────
+EMAIL_RISK_SCORES = {
+    'anonymous.com':     1.0,
+    'guerrillamail.com': 1.0,
+    'tempmail.com':      1.0,
+    'throwam.com':       0.9,
+    'mailnull.com':      0.9,
+    'yopmail.com':       0.9,
+    'gmail.com':         0.2,
+    'yahoo.com':         0.25,
+    'hotmail.com':       0.25,
+    'outlook.com':       0.15,
+    'company.com':       0.05,
 }
-MEDIUM_RISK_EMAILS = {'gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com'}
+EMAIL_RISK_DEFAULT = 0.3   # unknown domain fallback
+
+# ── Product code risk ────────────────────────────────────────
+HIGH_RISK_PRODUCTS = {'W', 'C'}   # Digital goods + Cash — untraceable
 
 # ── Rule thresholds ──────────────────────────────────────────
 RULE_AMOUNT_WARN   = 5_000
 RULE_AMOUNT_AML    = 10_000
 RULE_NIGHT_AMOUNT  = 500
 RULE_EMAIL_AMOUNT  = 200
-RULE_MODEL_THRESH  = 0.9        # R05 triggers when xgb_score > this
+RULE_MODEL_THRESH  = 0.75   # aligned with CRITICAL band
 
 # ── Pattern flag thresholds ──────────────────────────────────
 PATTERN_HIGH_AMT   = 3_000

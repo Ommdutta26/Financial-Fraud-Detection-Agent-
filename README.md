@@ -2,6 +2,18 @@
 
 > A multi-agent AI system for real-time transaction fraud detection — combining XGBoost ensemble scoring, LangGraph orchestration, SHAP explainability, and Groq LLM reasoning in a Streamlit dashboard.
 
+## 🚀 Live Demo
+
+Experience the full fraud detection pipeline in action:
+
+👉 https://financial-fraud-detection-agent.onrender.com/
+
+- Real-time fraud scoring
+- SHAP explainability
+- LLM-generated reasoning
+- Interactive dashboard
+
+> ⚠️ Note: The app may take a few seconds to start due to cold boot on Render.
 ---
 
 ## 📌 Overview

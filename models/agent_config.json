@@ -1,0 +1,35 @@
+{
+  "model_version": "2.0.0",
+  "trained_on": "472,432 IEEE-CIS transactions",
+  "fraud_rate": 0.035,
+  "trees": 7711,
+  "decision_thresholds": {
+    "fast_approve": 0.03,
+    "flag": 0.1653,
+    "block": 0.3306
+  },
+  "top_features": [
+    "card_email_fraud_rate",
+    "card1_fraud_rate",
+    "card_addr_count",
+    "card1_tx_count",
+    "card_tx_sequence",
+    "card_amount_rank",
+    "card1_amount_deviation",
+    "hour",
+    "TransactionAmt",
+    "amount_dec"
+  ],
+  "feature_store_coverage": {
+    "cards_seen": 13553,
+    "emails_seen": 59,
+    "combos_seen": 38162
+  },
+  "metrics": {
+    "xgb_roc_auc": 0.9235,
+    "cal_roc_auc": 0.9247,
+    "xgb_pr_auc": 0.6611,
+    "best_f1": 0.6552,
+    "threshold": 0.3306
+  }
+}

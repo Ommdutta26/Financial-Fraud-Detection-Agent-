@@ -18,13 +18,15 @@ _BASE_LAYOUT = dict(
 
 # ── Risk Gauge ────────────────────────────────────────────────────────────────
 
-def build_risk_gauge(score: float, color: str, threshold: float = 0.54) -> go.Figure:
+def build_risk_gauge(score: float, color: str,
+                     threshold: float = 0.37) -> go.Figure:  # updated default
     """Gauge chart showing fraud risk as a percentage."""
     fig = go.Figure(go.Indicator(
         mode='gauge+number+delta',
         value=score * 100,
         title={'text': "Fraud Risk %", 'font': {'color': '#94a3b8'}},
-        delta={'reference': 50, 'increasing': {'color': '#ef4444'}},
+        delta={'reference': threshold * 100,       # delta vs actual threshold
+               'increasing': {'color': '#ef4444'}},
         gauge={
             'axis': {
                 'range': [0, 100],
@@ -41,7 +43,7 @@ def build_risk_gauge(score: float, color: str, threshold: float = 0.54) -> go.Fi
             'threshold': {
                 'line': {'color': 'white', 'width': 3},
                 'thickness': 0.75,
-                'value': threshold * 100,
+                'value': threshold * 100,           # dynamic — not hardcoded
             },
         },
         number={'suffix': '%', 'font': {'color': color}},
@@ -87,7 +89,8 @@ def build_shap_bar(shap_dict: dict) -> go.Figure:
 
 # ── Score Trend (session history) ─────────────────────────────────────────────
 
-def build_score_trend(hist_df: pd.DataFrame, colors_map: dict) -> go.Figure:
+def build_score_trend(hist_df: pd.DataFrame, colors_map: dict,
+                      threshold: float = 0.37) -> go.Figure:  # ← parameter added
     """Line + marker chart of fraud scores across the session."""
     fig = go.Figure()
     fig.add_trace(go.Scatter(
@@ -102,10 +105,10 @@ def build_score_trend(hist_df: pd.DataFrame, colors_map: dict) -> go.Figure:
         ),
     ))
     fig.add_hline(
-        y=0.54,
+        y=threshold,                               # ← dynamic now
         line_dash='dash',
         line_color='#ef4444',
-        annotation_text='Threshold',
+        annotation_text=f'Threshold ({threshold:.2f})',
     )
     fig.update_layout(
         **_BASE_LAYOUT,

@@ -70,9 +70,9 @@ def _render_score_breakdown(result: dict, color: str) -> None:
     st.markdown("#### 🎯 Score Breakdown")
 
     cards = [
-        ("#6366f1", "XGBoost Score",  f"{result['xgb_score']:.4f}"),
-        (color,     "Ensemble Score", f"{result['score']:.4f}"),
-        ("#e2e8f0", "Confidence",     f"{result['confidence']:.1f}%"),
+        ("#6366f1", "XGBoost Score",    f"{result['xgb_score']:.4f}"),
+        (color,     "Calibrated Score", f"{result['score']:.4f}"),
+        ("#e2e8f0", "Confidence",       f"{result['confidence']:.1f}%"),
     ]
     for text_color, label, value in cards:
         st.markdown(f"""
@@ -84,18 +84,30 @@ def _render_score_breakdown(result: dict, color: str) -> None:
         """, unsafe_allow_html=True)
         st.markdown("<br>", unsafe_allow_html=True)
 
+    # Risk summary — single biggest signal
+    risk_summary = result.get('risk_summary', '')
+    if risk_summary:
+        st.markdown(f"""
+        <div style="background:#2d1f0e;border-left:3px solid #f59e0b;
+                    border-radius:4px;padding:8px 12px;
+                    color:#fcd34d;font-size:0.85em;margin-top:4px">
+            ⚠️ {risk_summary}
+        </div>
+        """, unsafe_allow_html=True)
 
 def _render_pipeline_steps(result: dict) -> None:
     st.markdown("#### 🔄 Agent Pipeline Steps")
 
-    first_shap = result['shap_reasons'][0][:35] + '...' if result['shap_reasons'] else 'N/A'
+    first_shap = result['shap_reasons'][0][:35] + '...' \
+                 if result['shap_reasons'] else 'N/A'
     steps = [
         ("1", "Risk Scorer",      f"XGBoost: {result['xgb_score']:.3f}"),
-        ("2", "Pattern Analyzer", f"{len(result['pattern_flags'])} patterns found"),
-        ("3", "Rule Engine",      f"{len(result['rule_flags'])} rules triggered"),
-        ("4", "SHAP Explainer",   f"Top: {first_shap}"),
-        ("5", "Groq LLM",         f"Decision: {result['decision']}"),
-        ("6", "Report Writer",    "Report generated ✅"),
+        ("2", "Memory Check",     f"{len(result.get('velocity_flags', []))} velocity flags"),
+        ("3", "Pattern Analyzer", f"{len(result['pattern_flags'])} patterns found"),
+        ("4", "Rule Engine",      f"{len(result['rule_flags'])} rules triggered"),
+        ("5", "SHAP Explainer",   f"Top: {first_shap}"),
+        ("6", "Groq LLM",         f"Decision: {result['decision']}"),
+        ("7", "Report Writer",    "Report generated ✅"),
     ]
     for num, name, detail in steps:
         st.markdown(f"""
@@ -166,11 +178,25 @@ def _render_llm_reasoning(result: dict) -> None:
     </div>
     """, unsafe_allow_html=True)
 
+    # Counterfactual — what would make this safer
+    counterfactual = result.get('counterfactual', '')
+    if counterfactual and counterfactual not in (
+            '', 'N/A — transaction is low risk',
+            'Counterfactual analysis not available.'):
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("#### 💡 What Would Make This Safer?")
+        st.markdown(f"""
+        <div style="background:#0d2137;border-left:3px solid #38bdf8;
+                    border-radius:6px;padding:12px 15px;color:#bae6fd;
+                    font-size:0.9em;line-height:1.6">
+            {counterfactual}
+        </div>
+        """, unsafe_allow_html=True)
+
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("#### 📋 Top Risk Factors")
     for i, reason in enumerate(result['shap_reasons'][:5], 1):
         st.markdown(f"**{i}.** {reason}")
-
 
 def _render_report(result: dict) -> None:
     st.markdown("#### 📄 Investigation Report")

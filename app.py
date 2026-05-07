@@ -43,7 +43,7 @@ col_title, col_time = st.columns([3, 1])
 with col_title:
     st.markdown("# 🔍 Fraud Detection Agent")
     st.markdown(
-        "**Multi-Agent AI System** | XGBoost Ensemble + "
+        "**Multi-Agent AI System** | Calibrated XGBoost + "
         "LangGraph Orchestration + Groq LLM Reasoning"
     )
 with col_time:
@@ -59,22 +59,21 @@ st.markdown("---")
 # ── Analysis ──────────────────────────────────────────────────────────────────
 
 if analyze_clicked:
-    with st.spinner("🧠 Agent analyzing transaction through 6-node pipeline..."):
+    with st.spinner("🧠 Agent analyzing transaction through 7-node pipeline..."):
         result = run_agent(user_input)
 
     append_history(result, amount=user_input['TransactionAmt'])
     render_result(result)
 
 else:
-    # Placeholder shown before first analysis
     st.markdown("""
     <div style="text-align:center;padding:60px;color:#475569">
         <h2>👈 Enter transaction details in the sidebar</h2>
-        <p>Click <b>Analyze Transaction</b> to run the 6-node AI agent pipeline</p>
+        <p>Click <b>Analyze Transaction</b> to run the 7-node AI agent pipeline</p>
         <br>
         <p style="font-size:0.9em">
             <b>Pipeline:</b>
-            Risk Scorer → Pattern Analyzer → Rule Engine →
+            Risk Scorer → Memory Check → Pattern Analyzer → Rule Engine →
             SHAP Explainer → Groq LLM → Report Writer
         </p>
     </div>
@@ -91,7 +90,7 @@ render_history()
 st.markdown("---")
 st.markdown(
     "<p style='text-align:center;color:#334155;font-size:0.8em'>"
-    "Fraud Detection Agent | XGBoost + LangGraph + Groq LLM | "
+    "Fraud Detection Agent | Calibrated XGBoost + LangGraph + Groq LLM | "
     "IEEE-CIS Dataset | Built for placement portfolio"
     "</p>",
     unsafe_allow_html=True,

@@ -11,6 +11,7 @@ from datetime import datetime
 
 from components.charts import build_score_trend, build_decision_pie
 from styles.custom_css import COLORS_MAP
+from agent import models_loader
 
 
 # ── Session-state helpers ─────────────────────────────────────────────────────
@@ -24,11 +25,15 @@ def init_history() -> None:
 def append_history(result: dict, amount: float) -> None:
     """Append one transaction record to session history."""
     st.session_state.history.append({
-        'time':     datetime.now().strftime('%H:%M:%S'),
-        'amount':   amount,
-        'decision': result['decision'],
-        'score':    result['score'],
-        'flags':    len(result['pattern_flags']) + len(result['rule_flags']),
+        'time':         datetime.now().strftime('%H:%M:%S'),
+        'amount':       amount,
+        'decision':     result['decision'],
+        'score':        result['score'],
+        'flags':        len(result['pattern_flags']) +
+                        len(result['rule_flags']),
+        'velocity':     len(result.get('velocity_flags', [])),
+        'risk_level':   result.get('risk_level', ''),
+        'risk_summary': result.get('risk_summary', ''),
     })
 
 
@@ -44,24 +49,60 @@ def render_history() -> None:
 
     hist_df = pd.DataFrame(st.session_state.history)
 
+    # ── Summary stats row ─────────────────────────────────────
+    total     = len(hist_df)
+    blocked   = (hist_df['decision'] == 'BLOCK').sum()
+    flagged   = (hist_df['decision'] == 'FLAG').sum()
+    approved  = (hist_df['decision'] == 'APPROVE').sum()
+    avg_score = hist_df['score'].mean()
+
+    m1, m2, m3, m4, m5 = st.columns(5)
+    m1.metric("Total",     total)
+    m2.metric("Approved",  approved)
+    m3.metric("Flagged",   flagged)
+    m4.metric("Blocked",   blocked)
+    m5.metric("Avg Score", f"{avg_score:.3f}")
+
+    # ── Get actual threshold from model ───────────────────────
+    try:
+        threshold = models_loader.get()['THRESHOLD']
+    except Exception:
+        threshold = 0.37
+
+    # ── Charts ────────────────────────────────────────────────
     col_h1, col_h2 = st.columns([2, 1])
 
     with col_h1:
-        fig_trend = build_score_trend(hist_df, COLORS_MAP)
+        fig_trend = build_score_trend(hist_df, COLORS_MAP,
+                                      threshold=threshold)
         st.plotly_chart(fig_trend, use_container_width=True)
 
     with col_h2:
         fig_pie = build_decision_pie(hist_df, COLORS_MAP)
         st.plotly_chart(fig_pie, use_container_width=True)
 
+    # ── Table ─────────────────────────────────────────────────
+    display_df = hist_df.rename(columns={
+        'time':         'Time',
+        'amount':       'Amount ($)',
+        'decision':     'Decision',
+        'score':        'Score',
+        'flags':        'Flags',
+        'velocity':     'Velocity',
+        'risk_level':   'Risk Level',
+        'risk_summary': 'Primary Risk',
+    })
+
+    def colour_decision(val):
+        colours = {
+            'APPROVE': 'color: #22c55e',
+            'FLAG':    'color: #f59e0b',
+            'BLOCK':   'color: #ef4444',
+        }
+        return colours.get(val, '')
+
     st.dataframe(
-        hist_df.rename(columns={
-            'time':     'Time',
-            'amount':   'Amount ($)',
-            'decision': 'Decision',
-            'score':    'Score',
-            'flags':    'Flags',
-        }),
+        display_df.style.map(colour_decision, subset=['Decision']),
         use_container_width=True,
         hide_index=True,
     )

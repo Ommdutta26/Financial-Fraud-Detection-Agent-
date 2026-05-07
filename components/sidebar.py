@@ -16,6 +16,11 @@ PRODUCT_LABELS = {
     'R': 'R — Retail',
 }
 
+DAY_LABELS = {
+    0: 'Monday', 1: 'Tuesday', 2: 'Wednesday',
+    3: 'Thursday', 4: 'Friday', 5: 'Saturday', 6: 'Sunday',
+}
+
 
 def render_sidebar() -> tuple[dict, bool]:
     """
@@ -45,11 +50,22 @@ def render_sidebar() -> tuple[dict, bool]:
         email = st.selectbox(
             "📧 Email Domain",
             options=[
-                'gmail.com', 'yahoo.com', 'outlook.com',
-                'hotmail.com', 'anonymous.com',
-                'guerrillamail.com', 'company.com',
+                # Safe — low fraud rate
+                'att.net',           # 0.7%
+                'verizon.net',       # 0.8%
+                'yahoo.com',         # 2.3%
+                'aol.com',           # 2.2%
+                # Medium — elevated
+                'gmail.com',         # 4.4%
+                'hotmail.com',       # 5.3%
+                'outlook.com',       # 9.5%
+                # High risk — real data
+                'aim.com',           # 12.7%
+                'outlook.es',        # 13.0%
+                'mail.com',          # 19.0%
+                'protonmail.com',    # 40.8% ← highest in dataset
             ],
-            help="Sender email domain",
+            help="Sender email domain — fraud rate shown in brackets",
         )
 
         product = st.selectbox(
@@ -65,6 +81,32 @@ def render_sidebar() -> tuple[dict, bool]:
             value=12345,
         )
 
+        # ── Advanced inputs (optional) ───────────────────────
+        with st.expander("⚙️ Advanced Inputs (optional)"):
+            st.caption("These improve inference accuracy when provided.")
+
+            day_of_week = st.selectbox(
+                "📅 Day of Week",
+                options=list(DAY_LABELS.keys()),
+                index=2,
+                format_func=lambda x: DAY_LABELS[x],
+            )
+
+            device = st.selectbox(
+                "💻 Device Type",
+                options=['Windows', 'iOS Device', 'MacOS',
+                         'Android', 'Unknown'],
+                help="Device used for transaction",
+            )
+
+            card2 = st.number_input(
+                "💳 Card2 ID",
+                min_value=1,
+                max_value=999,
+                value=111,
+                help="Secondary card identifier",
+            )
+
         st.markdown("---")
         analyze_clicked = st.button(
             "🔍 Analyze Transaction",
@@ -78,7 +120,7 @@ def render_sidebar() -> tuple[dict, bool]:
         st.markdown(
             "**Stack:** XGBoost + LangGraph + Groq LLM  \n"
             "**Dataset:** IEEE-CIS Fraud Detection  \n"
-            "**Model:** Ensemble (XGB + IsoForest)"
+            "**Model:** Calibrated XGBoost (7668 trees)"  # ← fixed
         )
 
     user_input = {
@@ -87,6 +129,10 @@ def render_sidebar() -> tuple[dict, bool]:
         'P_emaildomain':  email,
         'ProductCD':      product,
         'card1':          card_id,
+        # Advanced
+        'day_of_week':    day_of_week,
+        'DeviceInfo':     device,
+        'card2':          card2,
     }
 
     return user_input, analyze_clicked
@@ -97,12 +143,22 @@ def _render_model_info() -> None:
     st.markdown("---")
     st.markdown("### ℹ️ Model Info")
     try:
-        summary_path = os.path.join('models', 'model_summary.json')
-        with open(summary_path) as f:
-            ms = json.load(f)
+        # Try pkl first, fall back to json
+        import joblib
+        summary_path_pkl  = os.path.join('models', 'model_summary.pkl')
+        summary_path_json = os.path.join('models', 'model_summary.json')
+
+        if os.path.exists(summary_path_pkl):
+            ms = joblib.load(summary_path_pkl)
+        else:
+            with open(summary_path_json) as f:
+                ms = json.load(f)
+
         st.metric("ROC-AUC",  ms.get('ensemble_roc_auc', 'N/A'))
         st.metric("PR-AUC",   ms.get('ensemble_pr_auc',  'N/A'))
         st.metric("F1 Score", ms.get('best_f1',           'N/A'))
         st.metric("Features", ms.get('features_count',    'N/A'))
-    except FileNotFoundError:
-        st.info("model_summary.json not found")
+        st.metric("Trees",    ms.get('trees',              'N/A'))
+
+    except (FileNotFoundError, Exception):
+        st.info("Model summary not found")

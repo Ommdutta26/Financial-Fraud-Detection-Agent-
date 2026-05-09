@@ -11,7 +11,7 @@ from agent import rules
 from agent import llm_client
 from agent import report as report_builder
 from agent.config import FAST_APPROVE_THRESHOLD
-
+from agent.scoring import get_risk_level
 logger = logging.getLogger(__name__)
 
 
@@ -186,15 +186,21 @@ def node_decide(state: dict) -> dict:
         f"[Decide] {parsed['decision']} "
         f"confidence={parsed['confidence']:.1f}%"
     )
-
+    risk_level = get_risk_level(state['calibrated_score'])
     rules.record_transaction(state['transaction'])
-
+    if parsed['decision'] == 'BLOCK' and state['risk_level'] == 'LOW':
+        risk_level = 'HIGH'   # rules overrode model — show HIGH not LOW
+    elif parsed['decision'] == 'FLAG' and state['risk_level'] == 'LOW':
+        risk_level = 'MEDIUM'
+    else:
+        risk_level = state['risk_level']
     return {
         **state,
         'decision':        parsed['decision'],
         'confidence':      parsed['confidence'],
         'risk_summary':    parsed.get('risk_summary', ''),
         'agent_reasoning': parsed['reasoning'],
+        'risk_level':      risk_level,
     }
 # ── Node 8: Report ────────────────────────────────────────────
 

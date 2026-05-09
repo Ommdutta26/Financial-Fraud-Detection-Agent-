@@ -1,15 +1,3 @@
-# ============================================================
-# features.py — Raw transaction → full model feature vector
-#
-# Model trained on 29 inferable features only.
-# No label encoders needed — all features are numeric.
-# Priority:
-#   1. Feature store lookup  (real historical data)
-#   2. Derived from inputs   (computed directly)
-#   3. Imputation median     (training-set median)
-#   4. -999                  (last resort)
-# ============================================================
-
 import numpy as np
 import pandas as pd
 import logging

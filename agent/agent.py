@@ -8,6 +8,7 @@ import numpy as np
 from agent import features as feat_builder
 from agent import graph as pipeline
 from agent.graph import FraudState
+from langsmith import traceable, get_current_run_tree  # single clean import
 
 logging.basicConfig(
     level  = logging.INFO,
@@ -16,7 +17,11 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-
+@traceable(
+    name="fraud-agent",
+    run_type="chain",
+    tags=["fraud", "production"],
+)
 def run_agent(user_input: dict) -> dict:
     """
     Main entry point for the fraud detection agent.
@@ -40,7 +45,18 @@ def run_agent(user_input: dict) -> dict:
         f"hour={user_input.get('hour', '?')}"
     )
 
-    # Build features + provenance (what data source each value came from)
+    # ── LangSmith metadata ───────────────────────────────────
+    run = get_current_run_tree()   # must be assigned before use
+    if run:
+        run.metadata.update({
+            "amount":  user_input.get("TransactionAmt"),
+            "email":   user_input.get("P_emaildomain"),
+            "card":    user_input.get("card1"),
+            "hour":    user_input.get("hour"),
+            "product": user_input.get("ProductCD"),
+        })
+
+    # ── Build features + provenance ──────────────────────────
     features, provenance = feat_builder.build_features_with_provenance(user_input)
 
     initial_state = FraudState(
@@ -68,6 +84,15 @@ def run_agent(user_input: dict) -> dict:
 
     result = pipeline.get_graph().invoke(initial_state)
 
+    # ── Tag output decision back to LangSmith trace ──────────
+    if run:
+        run.metadata.update({
+            "decision":   result.get("decision"),
+            "risk_level": result.get("risk_level"),
+            "score":      result.get("ensemble_score"),
+            "flags":      len(result.get("rule_flags", [])),
+        })
+
     return {
         'decision':        result.get('decision',
                                result.get('final_decision', 'FLAG')),
@@ -87,7 +112,6 @@ def run_agent(user_input: dict) -> dict:
 
 
 if __name__ == '__main__':
-    # Quick smoke test
     sample = {
         'TransactionAmt': 4500.00,
         'hour': 2,

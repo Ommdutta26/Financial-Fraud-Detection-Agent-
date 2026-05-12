@@ -6,7 +6,7 @@ import os
 import logging
 from dotenv import load_dotenv
 from groq import Groq
-
+from langsmith import traceable
 from agent.config import (
     GROQ_MODEL, LLM_MAX_TOKENS, LLM_TEMPERATURE,
     PRODUCT_LABELS, EMAIL_RISK_SCORES, EMAIL_RISK_DEFAULT,
@@ -29,7 +29,14 @@ DECISION FRAMEWORK:
 Be concise, precise, and specific. Reference actual values from the data provided.
 Never give generic responses. Every word must be grounded in the specific transaction."""
 
-
+@traceable(
+    name="groq-fraud-decision",
+    run_type="llm",
+    metadata={
+        "provider": "groq",
+        "model": GROQ_MODEL,
+    }
+)
 def call_groq(prompt: str) -> str:
     try:
         response = _client.chat.completions.create(

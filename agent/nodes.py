@@ -212,14 +212,31 @@ def node_report(state: dict) -> dict:
 
 # ── Router ────────────────────────────────────────────────────
 
+# nodes.py
 def route_after_score(state: dict) -> str:
-    """
-    Fast-approve only the most obviously clean transactions.
-    Everything else goes through the full 6-node pipeline.
-    """
     score = state['ensemble_score']
+    tx    = state['transaction']
+
     if score < FAST_APPROVE_THRESHOLD:
-        logger.info(f"[Router] → fast_approve (score={score:.4f})")
-        return "fast_approve"
+        quick_rules    = rules.get_rule_flags(tx, score)
+        quick_patterns = rules.get_pattern_flags(
+            tx, score, provenance=state.get('provenance')
+        )
+        has_signals = bool(quick_rules or quick_patterns)
+
+        if not has_signals:
+            logger.info(f"[Router] → fast_approve (score={score:.4f}, clean)")
+            return "fast_approve"
+
+        # Low score but signals detected — cannot skip pipeline
+        logger.warning(
+            f"[Router] → full pipeline | score={score:.4f} below "
+            f"fast-approve threshold BUT signals detected "
+            f"(rules={len(quick_rules)}, patterns={len(quick_patterns)})"
+        )
+        state['rule_flags']    = quick_rules
+        state['pattern_flags'] = quick_patterns
+        return "memory"
+
     logger.info(f"[Router] → full pipeline (score={score:.4f})")
     return "memory"

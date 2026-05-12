@@ -22,7 +22,7 @@ def build_report(state: dict) -> str:
     emoji      = _EMOJI.get(decision, '❓')
     action     = _ACTION.get(decision, 'Unknown action.')
     provenance = state.get('provenance', {})
-
+    
     # ── Format sections ──────────────────────────────────────
     shap_lines = "\n".join(
         f"  {i+1}. {r}"

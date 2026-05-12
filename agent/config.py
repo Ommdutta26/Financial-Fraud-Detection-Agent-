@@ -4,11 +4,11 @@
 
 # ── Groq / LLM ──────────────────────────────────────────────
 GROQ_MODEL       = "llama-3.3-70b-versatile"
-LLM_MAX_TOKENS   = 600
+LLM_MAX_TOKENS   = 900
 LLM_TEMPERATURE  = 0.1
 
 # ── Decision thresholds ──────────────────────────────────────
-FAST_APPROVE_THRESHOLD   = 0.001
+FAST_APPROVE_THRESHOLD   = 0.03
 DECISION_BLOCK_THRESHOLD = 0.70
 DECISION_FLAG_THRESHOLD  = 0.30
 

@@ -7,7 +7,7 @@ All heavy lifting is delegated to the components/ and styles/ modules.
 
 import streamlit as st
 from datetime import datetime
-
+import requests
 from styles.custom_css import CUSTOM_CSS
 from components.sidebar import render_sidebar
 from components.result_display import render_result
@@ -61,6 +61,36 @@ st.markdown("---")
 if analyze_clicked:
     with st.spinner("🧠 Agent analyzing transaction through 7-node pipeline..."):
         result = run_agent(user_input)
+        
+        payload = {
+            "transaction_id": f"TXN-{user_input.get('card1', 'UNKNOWN')}",
+            "transaction_amount": user_input.get("TransactionAmt"),
+            "risk_level": result.get("risk_level"),
+            "score": result.get("score"),
+            "decision": result.get("decision"),
+            "confidence": result.get("confidence"),
+            "agent_reasoning": result.get("agent_reasoning"),
+            "rule_flags": result.get("rule_flags"),
+            "pattern_flags": result.get("pattern_flags"),
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        }
+
+        # ============================================================
+        # Send result to n8n automation workflow
+        # ============================================================
+
+        try:
+            response = requests.post(
+                "https://omm-dutta.app.n8n.cloud/webhook/fraud-alert",
+                json=payload,
+                timeout=5
+            )
+
+            if response.status_code == 200:
+                st.success("✅ Fraud alert sent to automation pipeline")
+
+        except Exception as e:
+            st.warning(f"⚠️ n8n webhook failed: {e}")
 
     append_history(result, amount=user_input['TransactionAmt'])
     render_result(result)

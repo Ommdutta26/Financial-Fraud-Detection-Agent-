@@ -169,10 +169,6 @@ def get_pattern_flags(tx: dict, ensemble_score: float,
         elif not provenance.get('card_seen_before'):
             flags.append("🆕 Card not seen in training data — unknown history")
 
-    # ── Velocity ──────────────────────────────────────────────
-    velocity_flags = get_velocity_flags(tx)
-    flags.extend(velocity_flags)
-
     return flags
 
 
